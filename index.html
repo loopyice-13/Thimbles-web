@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>THH Thimbles Predictor</title>
+
+<style>
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
+}
+
+/* ===== BODY ===== */
+body {
+  margin: 0;
+  font-family: "Poppins", system-ui, sans-serif;
+  background: radial-gradient(circle at top, #3a0057 0%, #120018 65%);
+  color: #fff;
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* ===== HEADER ===== */
+.header {
+  margin-top: 24px;
+}
+
+.logo {
+  width: 160px;
+  max-width: 70%;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 22px rgba(0,255,213,0.6));
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+h1 span {
+  color: #00ffd5;
+}
+
+/* ===== CONTROL PANEL ===== */
+.panel {
+  margin: 18px auto 0;
+  width: 92%;
+  max-width: 420px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.panel input,
+.panel select {
+  flex: 1;
+  min-width: 140px;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-size: 15px;
+}
+
+.panel button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, #00ffd5, #00b3ff);
+  color: #000;
+  box-shadow: 0 0 25px rgba(0,255,213,.45);
+}
+
+/* ===== STAGE ===== */
+.stage {
+  position: relative;
+  width: 340px;
+  height: 230px;
+  margin: 70px auto 10px;
+}
+
+/* ===== POT ===== */
+.pot {
+  position: absolute;
+  bottom: 55px;
+  width: 90px;
+  height: 110px;
+  background: linear-gradient(180deg, #ffe7a1 0%, #d4a63a 100%);
+  border-radius: 22px 22px 34px 34px;
+  transform: rotateX(180deg);
+  transition:
+    left 0.18s cubic-bezier(.4,1.8,.6,1),
+    bottom 0.35s ease;
+  box-shadow:
+    inset 0 -10px 0 rgba(0,0,0,.25),
+    0 14px 25px rgba(0,0,0,.55);
+}
+
+.pot::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  width: 24px;
+  height: 60px;
+  background: rgba(255,255,255,.25);
+  border-radius: 50%;
+}
+
+.pot::after {
+  content: "";
+  position: absolute;
+  bottom: -14px;
+  left: 12px;
+  width: 66px;
+  height: 14px;
+  background: rgba(0,0,0,.6);
+  border-radius: 50%;
+  filter: blur(3px);
+}
+
+/* ===== BALL ===== */
+.ball {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+
+.show {
+  opacity: 1;
+}
+
+/* ===== RAISE ===== */
+.raise {
+  bottom: 135px;
+}
+
+/* ===== RESULT ===== */
+.result {
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+.result .highlight {
+  color: #00ffd5;
+  font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== HEADER IMAGE ===== -->
+<div class="header">
+  <img src="header.png" class="logo">
+  <h1><span>THH </span>Thimbles Predictor</h1>
+</div>
+
+<!-- ===== INPUT PANEL ===== -->
+<div class="panel">
+  <input id="userId" placeholder="User ID">
+  <select id="site">
+    <option>1xBet</option>
+    <option>Melbet</option>
+  </select>
+  <button onclick="start()">START PREDICTION</button>
+</div>
+
+<!-- ===== GAME STAGE ===== -->
+<div class="stage">
+  <div class="pot" id="p0" style="left:0px"><div class="ball">🏐</div></div>
+  <div class="pot" id="p1" style="left:125px"><div class="ball">🏐</div></div>
+  <div class="pot" id="p2" style="left:250px"><div class="ball">🏐</div></div>
+</div>
+
+<div class="result" id="result"></div>
+
+<script>
+const pots = [...document.querySelectorAll(".pot")];
+const positions = [0, 125, 250];
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function start() {
+  const user = userId.value || "Guest";
+  const site = document.getElementById("site").value;
+
+  // reset
+  pots.forEach(p => {
+    p.classList.remove("raise");
+    p.querySelector(".ball").classList.remove("show");
+  });
+
+  let current = [...positions];
+
+  // 🔁 10 FAST swaps (3× speed)
+  for (let i = 0; i < 10; i++) {
+    let a = Math.floor(Math.random() * 3);
+    let b;
+    do { b = Math.floor(Math.random() * 3); } while (a === b);
+
+    [current[a], current[b]] = [current[b], current[a]];
+
+    pots.forEach((p, i) => {
+      p.style.left = current[i] + "px";
+    });
+
+    await sleep(150);
+  }
+
+  // pick exactly 2 pots
+  const picks = [0,1,2].sort(() => Math.random() - 0.5).slice(0,2);
+
+  await sleep(250);
+
+  picks.forEach(i => {
+    pots[i].classList.add("raise");
+    pots[i].querySelector(".ball").classList.add("show");
+  });
+
+  const confidence = Math.floor(Math.random() * 16) + 70;
+
+  result.innerHTML = `
+    👤 ${user}<br>
+    🌐 ${site}<br><br>
+    🎯 Prediction: <span class="highlight">2 BALLS</span><br>
+    📊 Confidence: <span class="highlight">${confidence}%</span><br>
+    <small>Premium analysis complete</small>
+  `;
+}
+</script>
+
+</body>
+</html>
