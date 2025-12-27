@@ -5,12 +5,8 @@
 <title>THH Thimbles Predictor</title>
 
 <style>
-/* ===== RESET ===== */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-/* ===== BODY ===== */
 body {
   margin: 0;
   font-family: "Poppins", system-ui, sans-serif;
@@ -21,9 +17,7 @@ body {
 }
 
 /* ===== HEADER ===== */
-.header {
-  margin-top: 24px;
-}
+.header { margin-top: 24px; }
 
 .logo {
   width: 160px;
@@ -34,22 +28,15 @@ body {
 }
 
 @keyframes float {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-6px); }
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
   100% { transform: translateY(0); }
 }
 
-h1 {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-}
+h1 { margin: 0; font-size: 24px; font-weight: 600; }
+h1 span { color: #00ffd5; }
 
-h1 span {
-  color: #00ffd5;
-}
-
-/* ===== CONTROL PANEL ===== */
+/* ===== PANEL ===== */
 .panel {
   margin: 18px auto 0;
   width: 92%;
@@ -108,17 +95,6 @@ h1 span {
     0 14px 25px rgba(0,0,0,.55);
 }
 
-.pot::before {
-  content: "";
-  position: absolute;
-  top: 8px;
-  left: 12px;
-  width: 24px;
-  height: 60px;
-  background: rgba(255,255,255,.25);
-  border-radius: 50%;
-}
-
 .pot::after {
   content: "";
   position: absolute;
@@ -142,14 +118,10 @@ h1 span {
   transition: opacity .25s ease;
 }
 
-.show {
-  opacity: 1;
-}
+.ball.show { opacity: 1; }
 
 /* ===== RAISE ===== */
-.raise {
-  bottom: 135px;
-}
+.raise { bottom: 135px; }
 
 /* ===== RESULT ===== */
 .result {
@@ -166,13 +138,11 @@ h1 span {
 
 <body>
 
-<!-- ===== HEADER IMAGE ===== -->
 <div class="header">
   <img src="header.png" class="logo">
   <h1><span>THH </span>Thimbles Predictor</h1>
 </div>
 
-<!-- ===== INPUT PANEL ===== -->
 <div class="panel">
   <input id="userId" placeholder="User ID">
   <select id="site">
@@ -182,11 +152,10 @@ h1 span {
   <button onclick="start()">START PREDICTION</button>
 </div>
 
-<!-- ===== GAME STAGE ===== -->
 <div class="stage">
-  <div class="pot" id="p0" style="left:0px"><div class="ball">🏐</div></div>
-  <div class="pot" id="p1" style="left:125px"><div class="ball">🏐</div></div>
-  <div class="pot" id="p2" style="left:250px"><div class="ball">🏐</div></div>
+  <div class="pot" style="left:0px"><div class="ball">🏐</div></div>
+  <div class="pot" style="left:125px"><div class="ball">🏐</div></div>
+  <div class="pot" style="left:250px"><div class="ball">🏐</div></div>
 </div>
 
 <div class="result" id="result"></div>
@@ -195,15 +164,13 @@ h1 span {
 const pots = [...document.querySelectorAll(".pot")];
 const positions = [0, 125, 250];
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function start() {
   const user = userId.value || "Guest";
-  const site = document.getElementById("site").value;
+  const site = siteSelect = document.getElementById("site").value;
 
-  // reset
+  // RESET
   pots.forEach(p => {
     p.classList.remove("raise");
     p.querySelector(".ball").classList.remove("show");
@@ -211,7 +178,7 @@ async function start() {
 
   let current = [...positions];
 
-  // 🔁 10 FAST swaps (3× speed)
+  // SHUFFLE
   for (let i = 0; i < 10; i++) {
     let a = Math.floor(Math.random() * 3);
     let b;
@@ -226,22 +193,20 @@ async function start() {
     await sleep(150);
   }
 
-  // pick exactly 2 pots
-  const picks = [0,1,2].sort(() => Math.random() - 0.5).slice(0,2);
+  // ✅ PICK ONLY ONE POT
+  const pick = Math.floor(Math.random() * 3);
 
-  await sleep(250);
+  await sleep(300);
 
-  picks.forEach(i => {
-    pots[i].classList.add("raise");
-    pots[i].querySelector(".ball").classList.add("show");
-  });
+  pots[pick].classList.add("raise");
+  pots[pick].querySelector(".ball").classList.add("show");
 
   const confidence = Math.floor(Math.random() * 16) + 70;
 
   result.innerHTML = `
     👤 ${user}<br>
     🌐 ${site}<br><br>
-    🎯 Prediction: <span class="highlight">2 BALLS</span><br>
+    🎯 Prediction: <span class="highlight">1 BALL</span><br>
     📊 Confidence: <span class="highlight">${confidence}%</span><br>
     <small>Premium analysis complete</small>
   `;
